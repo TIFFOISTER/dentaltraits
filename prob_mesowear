@@ -1,0 +1,94 @@
+setwd('~/hypsodonty') 
+library(tidyverse)  
+library(dplyr)
+library(ggmap)
+library(raster)
+library(sf)
+library(ggforce)
+library(FSA)
+ 
+dat<-read.csv('./juha_probmes.csv')  #proboscidean mesowear data file# 
+names(dat)[names(dat)=="Mean.mesowear.angle"] <- "mes"
+ 
+#get data by site# 
+cron<- dat %>% filter(dat$Locality == 'Chemeron') 
+dman<- dat %>% filter(dat$Locality == 'Dmanisi') 
+fnuev<- dat %>% filter(dat$Locality == 'Fuente Nueva 3') 
+kanj<-dat %>% filter(dat$Locality == 'Kanjera')
+koobk<-dat %>% filter(dat$Locality == 'Koobi Fora (KBS)')
+koobo<-dat %>% filter(dat$Locality == 'Koobi Fora (Okote)')
+koobu<-dat %>% filter(dat$Locality == 'Koobi Fora (Upper Burgi)')
+nariok<-dat %>% filter(dat$Locality == 'Nariokotome MB')
+old1<-dat %>% filter(dat$Locality == 'Olduvai Bed I')
+old2<-dat %>% filter(dat$Locality == 'Olduvai Bed II')
+tr<-dat %>% filter(dat$Locality == 'Trinil')
+kb<-dat %>% filter(dat$Locality == 'Kedung Brubus')
+#average each species by site# 
+cron<- aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = cron, FUN = mean)
+dman<- aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = dman, FUN = mean)
+fnuev<- aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = fnuev, FUN = mean)
+kanj<- aggregate(mes ~ Species+Locality+Country+LAT+LONG, data =kanj, FUN = mean)
+koobk<- aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = koobk, FUN = mean)
+koobo<- aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = koobo, FUN = mean)
+koobu<- aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = koobu, FUN = mean)
+nariok<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = nariok, FUN = mean)
+old1<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = old1, FUN = mean)
+old2<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = old2, FUN = mean)
+tr<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = tr, FUN = mean)
+kb<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = kb, FUN = mean)
+
+#combine data & avg by site# 
+dat1 <- rbind(cron,dman,fnuev,kanj,koobk,koobo,koobu,nariok,old1,old2,tr,kb) 
+dat2<- aggregate(mes~Locality+Country+LAT+LONG, data=dat1, FUN=mean)
+ 
+#reorder plot#
+dat$Locality<- factor(dat$Locality,levels = c("Chemeron","Kanjera","Koobi Fora (KBS)","Koobi Fora (Okote)","Koobi Fora (Upper Burgi)",          
+                                              "Nariokotome MB","Olduvai Bed I","Olduvai Bed II","Dmanisi","Kedung Brubus","Trinil",                  
+                                              "Fuente Nueva 3"))
+#geom_point plot# 
+pointplot<-ggplot(dat)+
+  geom_point(aes(x=Locality, y=mes, colour=Species),alpha=0.75, size=5)+
+  scale_colour_manual(values=c('#ff7400','#0229bf','#5588ff','#99ccff','#b2ffde','#68dac7','#00cbb7','#ff93ac','#5ec986','#64d86b','#cca3ff'))+
+  theme_classic() 
+#add thresholds of browse/graze# 
+pointplot <- pointplot+
+geom_hline(data=dat, aes(yintercept=106), show.legend=FALSE,linetype='dashed', size=0.75)+
+geom_hline(data=dat, aes(yintercept=117), show.legend=FALSE,linetype='dashed', size=0.75)
+#add means for each site# and colour bg# 
+pointplot + 
+  geom_point(data=dat2,aes(x=Locality, y=mes), shape=18, col='black',size=7)+
+  annotate('rect',xmin = 0,
+           xmax = 8.5,
+           ymin = -Inf, ymax = Inf, alpha = 0.15,fill='#D9534F')+ 
+  annotate('rect',xmin = 8.5,
+           xmax = 9.5,
+           ymin = -Inf, ymax = Inf,alpha = 0.15,fill='#bada55')+ 
+  annotate('rect',xmin = 9.5,
+           xmax = 11.5,
+           ymin = -Inf, ymax = Inf,alpha = 0.15, fill ='#800080')+
+  annotate('rect',xmin = 11.5,
+           xmax = Inf,
+           ymin = -Inf, ymax = Inf,alpha = 0.15, fill='#428bca') 
+
+#map plot# 
+world.map <- map_data("world")
+world.map.plot <- ggplot() + geom_polygon(data=world.map, aes(x = long, y = lat, group=group), colour = '#d1beaa',fill='#d1beaa') + coord_map(xlim=c(-180,180)) + theme_void() + theme(panel.background = element_rect(fill = 'white',size = 0.5, linetype = 'solid',colour='white'))
+world.map.crop<- world.map.plot + coord_sf(xlim = c(-12, 121), ylim = c(-31.5, 47.5))
+world.map.crop
+
+#map of points#
+loc_map <- world.map.crop + geom_point(data=dat2,aes(x=LONG,y=LAT,colour=Country),alpha=0.8, size=3)+ scale_color_manual(values = c('Georgia'='#a0db8e', 'Kenya'='#c50000', 'Spain'='#3399ff', 'Tanzania'='#ea5252'))
+loc_map+ theme(legend.position="none") 
+#points coloured by hypsodonty# 
+mes_map <- world.map.crop + geom_point(data=dat2,aes(x=LONG,y=LAT,colour=mes),alpha=1, size=8)+ 
+  scale_colour_gradient(low='#53783b', high='#fce198')    
+mes_map  
+
+#stats# 
+ kruskal.test(mes~Locality, data=dat)
+ dunnTest(mes~Locality, data=dat, method="bonferroni")
+ lm.mes <- lm(mes~Locality, data=dat)
+ lm.anova <- aov(lm.mes)
+ summary(lm.anova)
+ plot(lm.mes)
+ TukeyHSD(lm.anova)
