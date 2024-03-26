@@ -7,7 +7,7 @@ library(sf)
 library(ggforce)
 library(FSA)
 
-dat2<-read.csv('./now_export_06_11.csv')  
+dat2<-read.csv('./now_export_06_11.csv') #this file is an export of the NOW database#  
 
 # select the LIDNUMs want # 
 dat2<- subset(dat2, LIDNUM==28666|LIDNUM==23189| LIDNUM == 21050 | LIDNUM == 23189 | LIDNUM == 23190 | LIDNUM == 23200 | LIDNUM == 23201 | LIDNUM == 23225 | 
@@ -274,8 +274,6 @@ vio +theme(text=element_text(size=23)) + theme(
   axis.title.x = element_text(vjust=-0.2),
   axis.title.y = element_text(vjust=1.75)) + theme(legend.position="none")
 
-#species level w/o homo# RUN extra no_homo file!# then re run from fixing indets# 
-
 #genus level# 
 #gendat<- distinct(spdat, GENUS, .keep_all = TRUE) 
 #write.csv(gendat, file='./nowgenus_20_10.csv')
@@ -393,9 +391,6 @@ vio <- ggplot(dat5, aes(x=region, y=hyps, fill=region))+
 vio +theme(text=element_text(size=23)) + theme(
   axis.title.x = element_text(vjust=-0.2),
   axis.title.y = element_text(vjust=1.75)) + theme(legend.position="none")
-
-#genus level w/o homo# dat1_nohomo# 
-#run the no_homo file 
 
 #lets make a map# 
 #get data back to with homo version#  
