@@ -6,8 +6,8 @@ library(raster)
 library(sf)
 library(ggforce)
 library(FSA)
- 
-dat<-read.csv('./juha_probmes.csv')  #proboscidean mesowear data file# 
+
+dat<-read.csv('./juha_probmes.csv')  
 names(dat)[names(dat)=="Mean.mesowear.angle"] <- "mes"
  
 #get data by site# 
@@ -36,11 +36,16 @@ old1<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = old1, FUN = mean
 old2<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = old2, FUN = mean)
 tr<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = tr, FUN = mean)
 kb<-aggregate(mes ~ Species+Locality+Country+LAT+LONG, data = kb, FUN = mean)
-
+#make versions of sites with Deinotheres that drop them, for equations# 
+cron_nd <- cron[-c(1), ]
+koobk_nd <- koobk[-c(1),]
+koobu_nd <- koobu[-c(1),]
+old2_nd <- old2[-c(1),]
 #combine data & avg by site# 
 dat1 <- rbind(cron,dman,fnuev,kanj,koobk,koobo,koobu,nariok,old1,old2,tr,kb) 
 dat2<- aggregate(mes~Locality+Country+LAT+LONG, data=dat1, FUN=mean)
- 
+dat1_nd<- rbind(cron_nd,dman,fnuev,kanj,koobk_nd,koobo,koobu_nd,nariok,old1,old2_nd,tr,kb)
+dat2_nd <-aggregate(mes~Locality+Country+LAT+LONG, data=dat1_nd, FUN=mean)
 #reorder plot#
 dat$Locality<- factor(dat$Locality,levels = c("Chemeron","Kanjera","Koobi Fora (KBS)","Koobi Fora (Okote)","Koobi Fora (Upper Burgi)",          
                                               "Nariokotome MB","Olduvai Bed I","Olduvai Bed II","Dmanisi","Kedung Brubus","Trinil",                  
@@ -69,20 +74,20 @@ pointplot +
   annotate('rect',xmin = 11.5,
            xmax = Inf,
            ymin = -Inf, ymax = Inf,alpha = 0.15, fill='#428bca') 
-
-#map plot# 
-world.map <- map_data("world")
-world.map.plot <- ggplot() + geom_polygon(data=world.map, aes(x = long, y = lat, group=group), colour = '#d1beaa',fill='#d1beaa') + coord_map(xlim=c(-180,180)) + theme_void() + theme(panel.background = element_rect(fill = 'white',size = 0.5, linetype = 'solid',colour='white'))
-world.map.crop<- world.map.plot + coord_sf(xlim = c(-12, 121), ylim = c(-31.5, 47.5))
-world.map.crop
-
-#map of points#
-loc_map <- world.map.crop + geom_point(data=dat2,aes(x=LONG,y=LAT,colour=Country),alpha=0.8, size=3)+ scale_color_manual(values = c('Georgia'='#a0db8e', 'Kenya'='#c50000', 'Spain'='#3399ff', 'Tanzania'='#ea5252'))
-loc_map+ theme(legend.position="none") 
-#points coloured by hypsodonty# 
-mes_map <- world.map.crop + geom_point(data=dat2,aes(x=LONG,y=LAT,colour=mes),alpha=1, size=8)+ 
-  scale_colour_gradient(low='#53783b', high='#fce198')    
-mes_map  
+# grass estimates# 
+#Elephantoidea only: Grass% = 2.4131744*MW - 230.9144
+E_function<- function(x)x*2.4131744-230.9144
+E_grass <- lapply(dat2_nd[c('mes')],E_function)
+E_grass<- as.data.frame(E_grass)
+names(E_grass)[names(E_grass)=="mes"] <- "mes_nd"
+#All Proboscidea: Grass% = 1.9729512*MW -174.5256
+A_function<-function(x)x*1.9729512-174.5256
+A_grass <- lapply(dat2[c('mes')],A_function)
+A_grass<- as.data.frame(A_grass)
+names <- subset(dat2, select = c('Locality','Country','LAT','LONG'))
+grass<- cbind(A_grass, E_grass) 
+grass[,'mean']<-rowMeans(grass,na.rm=T)
+grass2<-cbind(names, grass)
 
 #stats# 
  kruskal.test(mes~Locality, data=dat)
