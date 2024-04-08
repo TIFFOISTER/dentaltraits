@@ -7,7 +7,7 @@ library(sf)
 library(ggforce)
 library(FSA)
 
-dat2<-read.csv('./now_export_06_11.csv') #this file is an export of the NOW database#  
+dat2<-read.csv('./now_export_06_11.csv')  #this file is a full NOW export in csv format 
 
 # select the LIDNUMs want # 
 dat2<- subset(dat2, LIDNUM==28666|LIDNUM==23189| LIDNUM == 21050 | LIDNUM == 23189 | LIDNUM == 23190 | LIDNUM == 23200 | LIDNUM == 23201 | LIDNUM == 23225 | 
@@ -157,6 +157,11 @@ dat1_nohomo<-dat1_nohomo%>% mutate(hyps = case_when(TCRWNHT =='hyp'~3, TCRWNHT =
 
 dat2 <- dat1_nohomo 
 
+#21025 cervidae indet. indet. mean# 
+ced <- dat2 %>% filter(dat2$FAMILY == 'Cervidae') 
+ced_mean <- mean(ced$hyps,na.rm=T)
+dat2$hyps[dat2$SIDNUM =='21025'] <- ced_mean
+
 #28186 Hippopotamus/Hexaprotodon# 
 hip <- dat2 %>% filter(dat2$GENUS == 'Hippopotamus')  
 hex <- dat2 %>% filter(dat2$GENUS == 'Hexaprotodon')
@@ -260,7 +265,7 @@ dat3<- dat3 %>% mutate(region = case_when(LIDNUM=='29443'|LIDNUM=='23931'|LIDNUM
                                           LIDNUM=='24401'|LIDNUM=='27897'|LIDNUM=='29370'|LIDNUM=='29187'|LIDNUM=='24455'|LIDNUM=='24261'|LIDNUM=='28652'|LIDNUM=='28653'|LIDNUM=='28666'|LIDNUM=='29369'|LIDNUM=='24436'|
                                             LIDNUM=='28656'	~'Europe', 
                                           LIDNUM=='28455'|LIDNUM=='27996'|LIDNUM=='29451'|LIDNUM=='21050'|LIDNUM=='24348'|LIDNUM=='23521'~ 'Levant & Caucasus'))
-#violin plot# species level with homo# 
+#violin plot# species level# 
 dat3$region  <- factor(dat3$region,levels = c('Africa', 'Levant & Caucasus','Asia','Europe'))
 vio <- ggplot(dat3, aes(x=region, y=hyps, fill=region))+
   geom_violin()+ 
@@ -325,8 +330,6 @@ my_gen<-rbind(my_gen, my_indets)
 my_gen_nohomo<- my_gen[-c(34),]
 dat2<-rbind(a_genindets,dat2)
 gen_dat<- dat2 %>% group_by(LIDNUM) %>% distinct(GENUS, .keep_all=TRUE) %>% ungroup()
-gig <- data.frame(ORDER= c('Primates'), FAMILY=c('Hominidae'), GENUS=c('Gigantopithecus'), Score = c('bra'), hyps=c('1'))
-my_gen2<- rbind(gig, my_gen_nohomo)
 gen_dat2 <- merge(my_gen2, gen_dat, by = c('GENUS'))
 #fill in scores# 
 gen_dat2$hyps.x[gen_dat2$SIDNUM=='21161'] <-3
@@ -340,7 +343,7 @@ gen_dat2$hyps.x[gen_dat2$SIDNUM=='21158'] <-bovi_mean
 gen_dat2$hyps.x[gen_dat2$SIDNUM=='27973'] <-3
 gen_dat2$hyps.x[gen_dat2$SIDNUM=='23849'] <-3
 gen_dat2$hyps.x[gen_dat2$SIDNUM=='21166'] <-cepi_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21025'] <-1
+gen_dat2$hyps.x[gen_dat2$SIDNUM=='21025'] <-ced_mean
 gen_dat2$hyps.x[gen_dat2$SIDNUM=='22154'] <-1
 gen_dat2$hyps.x[gen_dat2$SIDNUM=='86311'] <-2 
 gen_dat2$hyps.x[gen_dat2$SIDNUM=='21175'] <-3
@@ -380,24 +383,26 @@ dat5<- dat5 %>% mutate(region = case_when(LIDNUM=='29443'|LIDNUM=='23931'|LIDNUM
                                             LIDNUM=='28656'	~'Europe',LIDNUM=='28455'|LIDNUM=='27996'|LIDNUM=='29451'|LIDNUM=='21050'|LIDNUM=='24348'|LIDNUM=='23521'~ 'Levant & Caucasus'))
 #violin plot 
 dat5$region  <- factor(dat5$region,levels = c('Africa', 'Levant & Caucasus','Asia','Europe'))
-vio <- ggplot(dat5, aes(x=region, y=hyps, fill=region))+
-  geom_violin()+ 
-  geom_sina(size=3,alpha=0.8)+
-  scale_fill_manual(values = c('Africa' = '#D9534F','Levant & Caucasus'='#bada55', 'Asia'= '#800080','Europe'='#428bca'))+
+vio <- ggplot(dat5, aes(x=region, y=hyps))+
+  geom_violin(size=1.25)+
+  geom_sina(size=9, alpha=0.5,aes(col=factor(region)))+ 
+  scale_colour_manual(values = c('Africa' = '#D9534F','Levant & Caucasus'='#bada55', 'Asia'= '#800080','Europe'='#428bca'))+
   ylab('Mean Ordinated Hypsodonty')+ xlab('Region')+ 
   theme(text=element_text(size=20), axis.title.x = element_text(hjust=2),
         axis.title.y = element_text(hjust=2)) + 
   theme_classic()
-vio +theme(text=element_text(size=23)) + theme(
-  axis.title.x = element_text(vjust=-0.2),
-  axis.title.y = element_text(vjust=1.75)) + theme(legend.position="none")
+
+vio+theme(text=element_text(size=23))+
+  theme(axis.title.x = element_text(vjust=-0.2),
+        axis.title.y = element_text(vjust=1.75)) + theme(legend.position="none")+
+  ylim(1,3) 
 
 #lets make a map# 
-#get data back to with homo version#  
 #get co-ords for dat 5# 
 loc_grab <-  subset(gen_dat2, select = c('LIDNUM','NAME','LAT','LONG'))
 dat6 <- merge(loc_grab, dat5, by = c('LIDNUM'))  
 dat6$hyps<- round(dat6$hyps, digits=2)
+dat6<-dat6[!duplicated(dat6), ]
 
 world.map <- map_data("world")
 world.map.plot <- ggplot() + geom_polygon(data=world.map, aes(x = long, y = lat, group=group), colour = '#d1beaa',fill='#d1beaa') + coord_map(xlim=c(-180,180)) + theme_void() + theme(panel.background = element_rect(fill = 'white',size = 0.5, linetype = 'solid',colour='white'))
@@ -422,21 +427,22 @@ afdat<- afdat%>%mutate(region = case_when(LIDNUM=='23201'|LIDNUM=='23225'|LIDNUM
                                           LIDNUM=='23864'|LIDNUM=='26913'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='26916'|LIDNUM=='27941'|LIDNUM=='28091'|LIDNUM=='28095'	~ 'Southern Africa'))
 #edit this to be for African regions!
 afdat$region  <- factor(afdat$region,levels = c('Northern Africa', 'Eastern Africa','Southern Africa'))
-vio <- ggplot(afdat, aes(x=region, y=hyps, fill=region))+
-  geom_violin()+ 
-  geom_sina(size=3,alpha=0.8)+
-  scale_fill_manual(values = c('Northern Africa' = '#ffb9b9','Eastern Africa'='#ee7272', 'Southern Africa'= '#a31818'))+
+vio <- ggplot(afdat, aes(x=region, y=hyps))+
+  geom_violin(size=1.25)+ 
+  geom_sina(size=9,alpha=0.5,aes(col=factor(region)))+
+  scale_colour_manual(values = c('Northern Africa' = '#ffb9b9','Eastern Africa'='#ee7272', 'Southern Africa'= '#a31818'))+
   ylab('Mean Ordinated Hypsodonty')+ xlab('Region')+ 
   theme(text=element_text(size=20), axis.title.x = element_text(hjust=2),
         axis.title.y = element_text(hjust=2)) + 
   theme_classic()
 vio +theme(text=element_text(size=23)) + 
   theme(axis.title.x = element_text(vjust=-0.2),
-        axis.title.y = element_text(vjust=1.75)) + theme(legend.position="none")
+        axis.title.y = element_text(vjust=1.75)) + theme(legend.position="none")+
+  ylim(1,3) 
 
 #stats stats stats# 
-kw_all <- kruskal.test(hyps ~ region, data = dat5) #p-value =  p-value = 9.83e-05 = need Dunn's 
-kw_af <- kruskal.test(hyps ~ region, data = afdat) #p-value = 0.2411 
+kw_all <- kruskal.test(hyps ~ region, data = dat5) 
+kw_af <- kruskal.test(hyps ~ region, data = afdat) 
 dunn_all <- dunnTest(hyps ~ region, data=dat5,method="bonferroni")
 kw_holm <- kruskal.test(hyps ~ region, data = dat5, method='holm')
 dunn_holm <-dunnTest(hyps ~ region, data=dat5,method="holm")
