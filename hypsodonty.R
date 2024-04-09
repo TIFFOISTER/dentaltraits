@@ -7,12 +7,12 @@ library(sf)
 library(ggforce)
 library(FSA)
 
-dat2<-read.csv('./now_export_06_11.csv')  #this file is a full NOW export in csv format 
+dat2<-read.csv('./now_export_09_04.csv')  #now export file# 
 
 # select the LIDNUMs want # 
 dat2<- subset(dat2, LIDNUM==28666|LIDNUM==23189| LIDNUM == 21050 | LIDNUM == 23189 | LIDNUM == 23190 | LIDNUM == 23200 | LIDNUM == 23201 | LIDNUM == 23225 | 
                 LIDNUM == 23246 |LIDNUM == 23247 | LIDNUM == 23521 | LIDNUM == 23682 | LIDNUM == 23858 | LIDNUM == 23864 | LIDNUM == 24398 | LIDNUM == 23931 | 
-                LIDNUM == 24084 |LIDNUM == 24089 | LIDNUM == 24094 | LIDNUM == 24147 | LIDNUM == 24149 | LIDNUM == 24150 |
+                LIDNUM == 24084 |LIDNUM == 29306 | LIDNUM == 24147 | LIDNUM == 24149 | LIDNUM == 24150 |
                 LIDNUM == 24261 |LIDNUM == 24348 | LIDNUM == 24397 | LIDNUM == 24400 | LIDNUM == 24401 | LIDNUM == 24402 | LIDNUM == 24403 | LIDNUM == 24404 |
                 LIDNUM == 24436 |LIDNUM == 24455 | LIDNUM == 24554 | LIDNUM == 26905 | LIDNUM == 26913 | LIDNUM == 26914 | LIDNUM == 26915 | LIDNUM == 26916 |
                 LIDNUM == 26960 |LIDNUM == 27897 | LIDNUM == 27898 | LIDNUM == 27941 | LIDNUM == 27996 | LIDNUM == 27998 | LIDNUM == 28091 | LIDNUM == 28095 |
@@ -260,7 +260,7 @@ dat3<- dat3 %>% mutate(region = case_when(LIDNUM=='29443'|LIDNUM=='23931'|LIDNUM
                                             LIDNUM=='23201'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='28392'|LIDNUM=='28373'|LIDNUM=='23246'|LIDNUM=='26916'|LIDNUM=='28340'|LIDNUM=='28345'|LIDNUM=='29386'|LIDNUM=='28397'|
                                             LIDNUM=='28366'|LIDNUM=='28328'|LIDNUM=='29395'|LIDNUM=='28344'|LIDNUM=='28091'|LIDNUM=='28367'|LIDNUM=='23190'|LIDNUM=='29394'|LIDNUM=='26960'|LIDNUM=='28095'|LIDNUM=='28348'|
                                             LIDNUM=='23864'|LIDNUM=='29385'|LIDNUM=='29387'	~'Africa',
-                                          LIDNUM=='23200'|LIDNUM=='24084'|LIDNUM=='24149'|LIDNUM=='24554'|LIDNUM=='24147'|LIDNUM=='24150'|LIDNUM=='24089'|LIDNUM=='24094'|LIDNUM=='29097'|
+                                          LIDNUM=='23200'|LIDNUM=='24084'|LIDNUM=='24149'|LIDNUM=='24554'|LIDNUM=='24147'|LIDNUM=='24150'|LIDNUM=='29306'|LIDNUM=='29097'|
                                             LIDNUM=='29308'|LIDNUM=='29185'|LIDNUM=='29151'|LIDNUM=='29106'|LIDNUM=='29108'|LIDNUM=='29152'~'Asia',
                                           LIDNUM=='24401'|LIDNUM=='27897'|LIDNUM=='29370'|LIDNUM=='29187'|LIDNUM=='24455'|LIDNUM=='24261'|LIDNUM=='28652'|LIDNUM=='28653'|LIDNUM=='28666'|LIDNUM=='29369'|LIDNUM=='24436'|
                                             LIDNUM=='28656'	~'Europe', 
@@ -280,10 +280,12 @@ vio +theme(text=element_text(size=23)) + theme(
   axis.title.y = element_text(vjust=1.75)) + theme(legend.position="none")
 
 #genus level# 
-#gendat<- distinct(spdat, GENUS, .keep_all = TRUE) 
-#write.csv(gendat, file='./nowgenus_20_10.csv')
-my_gen <- read.csv('./my_gen.csv')
-my_gen<-my_gen%>% mutate(hyps= case_when(Score =='hyp'~3, Score == 'mes'~2, Score == 'bra'~1, Score == 'bra/mes'~1.5))
+#write.csv(dat2, 'nowdat_09_04.csv') 
+sidat <- subset(dat2, select = c('SIDNUM','ORDER','FAMILY','GENUS')) 
+sidat2<- distinct(sidat, SIDNUM,.keep_all = T) 
+my_gen <- read.csv('./mygen_09_04.csv') # this is an edited version of the now_dat_09_04 exported earlier, to give all unique genera with hyp scores# 
+my_gen<-my_gen%>% mutate(hyps= case_when(Score =='hyp'~3, Score == 'mes'~2, Score == 'bra'~1, Score == 'bra/mes'~1.5, Score == 'hys'~3))
+
 #calculate avgs. for mixed hyps genera# 
 #Kolpochoerus
 kol <- dat2 %>% filter(dat2$GENUS =='Kolpochoerus')
@@ -309,65 +311,46 @@ my_gen$hyps[my_gen$GENUS=='Notochoerus']<-not_mean
 dic<- dat2 %>% filter(dat2$GENUS =='Diceros')
 dic_mean<- mean(dic$hyps, na.rm=T)
 my_gen$hyps[my_gen$GENUS=='Diceros']<-dic_mean
-
-#cut dataset (dat2) to genus level# 
-#keep each genus at site only once & fill in scores#
-#indet<- dat2 %>% filter(dat2$GENUS=='indet.') 
-#Indet<-dat2%>%filter(dat2$GENUS=='Indet.') 
-#gen<-dat2%>%filter(dat2$GENUS=='gen.')
-#ABOVEGENINDETS<-rbind(indet,Indet,gen)
-#write.csv(ABOVEGENINDETS,file='./abovegenindets.csv')
-dat2 <- subset(dat2, GENUS !='Indet.')
-dat2 <- subset(dat2, GENUS !='indet.')
-dat2 <- subset(dat2, GENUS !='gen.')
-a_genindets<- read.csv('./abovegenindets.csv') 
-a_genindets <- subset( a_genindets, select = -X )
-my_indets <- distinct(a_genindets, GENUS,.keep_all = T)
-my_indets<- subset(my_indets, select = c('ORDER','FAMILY','GENUS'))
-my_indets[, 'Score'] = NA
-my_indets[, 'hyps'] = NA
-my_gen<-rbind(my_gen, my_indets)
-my_gen_nohomo<- my_gen[-c(34),]
-dat2<-rbind(a_genindets,dat2)
-gen_dat<- dat2 %>% group_by(LIDNUM) %>% distinct(GENUS, .keep_all=TRUE) %>% ungroup()
-gen_dat2 <- merge(my_gen2, gen_dat, by = c('GENUS'))
-#fill in scores# 
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21161'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='27931'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='27968'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21165'] <-anti_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21023']<- bov_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='85540'] <-bov_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='25812'] <-bovi_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21158'] <-bovi_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='27973'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='23849'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21166'] <-cepi_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21025'] <-ced_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='22154'] <-1
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='86311'] <-2 
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21175'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='31951'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='23057'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21026'] <-gir_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='29440'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='28211'] <-hipe_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21159'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='24328'] <-1
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21177'] <-neo_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='27615'] <-1
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21160'] <-redi_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='27963'] <-redi_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='27930'] <-redi_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='21659'] <-rhi_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='33520'] <-3
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='86113'] <-suid_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='86112'] <-suid_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='27355'] <-trag_mean
-gen_dat2$hyps.x[gen_dat2$SIDNUM=='86114'] <-trag_mean
-
-#aggregate lidnums and get mean#  
-dat4<-subset(gen_dat2, select = c('GENUS', 'ORDER.x', 'FAMILY.x', 'Score','hyps.x','LIDNUM','NAME'))
+gen_dat <- merge(my_gen, sidat2, by = c('GENUS')) 
+gen_dat2 <- gen_dat
+#fill in above gen indets# these were identified using seperate code# 
+gen_dat2$hyps[gen_dat2$SIDNUM=='21025'] <- ced_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='21023'] <- bov_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='25812'] <- bovi_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='23849'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='21161'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='21026'] <- gir_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='21160'] <- redi_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='21165'] <- anti_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='21177'] <- neo_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='21159'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='21158'] <- bovi_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='27355'] <- trag_mean 
+gen_dat2$hyps[gen_dat2$SIDNUM=='27968'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='28211'] <- hipe_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='86112'] <- suid_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='86113'] <- suid_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='27963'] <- redi_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='27964'] <- redi_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='86114'] <- trag_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='21166'] <- cepi_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='27930'] <- redi_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='27931'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='27969'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='21659'] <- rhi_mean
+gen_dat2$hyps[gen_dat2$SIDNUM=='29440'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='23057'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='33520'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='27615'] <- 1
+gen_dat2$hyps[gen_dat2$SIDNUM=='22154'] <- 1
+gen_dat2$hyps[gen_dat2$SIDNUM=='21175'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='31951'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='86311'] <- 2
+gen_dat2$hyps[gen_dat2$SIDNUM=='27973'] <- 3
+gen_dat2$hyps[gen_dat2$SIDNUM=='27975'] <- 3
+ 
+gen_dat3 <- subset(gen_dat2, select = c('SIDNUM','hyps'))
+dat4 <- merge(gen_dat3, dat2, by = c('SIDNUM')) 
 dat4$hyps.x <- as.numeric(as.character(dat4$hyps.x))
 dat5 <- aggregate(hyps.x ~ LIDNUM, data = dat4, FUN = mean) 
 names(dat5)[names(dat5)=="hyps.x"] <- "hyps"
@@ -377,7 +360,7 @@ dat5<- dat5 %>% mutate(region = case_when(LIDNUM=='29443'|LIDNUM=='23931'|LIDNUM
                                             LIDNUM=='23201'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='28392'|LIDNUM=='28373'|LIDNUM=='23246'|LIDNUM=='26916'|LIDNUM=='28340'|LIDNUM=='28345'|LIDNUM=='29386'|LIDNUM=='28397'|
                                             LIDNUM=='28366'|LIDNUM=='28328'|LIDNUM=='29395'|LIDNUM=='28344'|LIDNUM=='28091'|LIDNUM=='28367'|LIDNUM=='23190'|LIDNUM=='29394'|LIDNUM=='26960'|LIDNUM=='28095'|LIDNUM=='28348'|
                                             LIDNUM=='23864'|LIDNUM=='29385'|LIDNUM=='29387'	~'Africa',
-                                          LIDNUM=='23200'|LIDNUM=='24084'|LIDNUM=='24149'|LIDNUM=='24554'|LIDNUM=='24147'|LIDNUM=='24150'|LIDNUM=='24089'|LIDNUM=='24094'|LIDNUM=='29097'|
+                                          LIDNUM=='23200'|LIDNUM=='24084'|LIDNUM=='24149'|LIDNUM=='24554'|LIDNUM=='24147'|LIDNUM=='24150'|LIDNUM=='29306'|LIDNUM=='29097'|
                                             LIDNUM=='29308'|LIDNUM=='29185'|LIDNUM=='29151'|LIDNUM=='29106'|LIDNUM=='29108'|LIDNUM=='29152'~'Asia',
                                           LIDNUM=='24401'|LIDNUM=='27897'|LIDNUM=='29370'|LIDNUM=='29187'|LIDNUM=='24455'|LIDNUM=='24261'|LIDNUM=='28652'|LIDNUM=='28653'|LIDNUM=='28666'|LIDNUM=='29369'|LIDNUM=='24436'|
                                             LIDNUM=='28656'	~'Europe',LIDNUM=='28455'|LIDNUM=='27996'|LIDNUM=='29451'|LIDNUM=='21050'|LIDNUM=='24348'|LIDNUM=='23521'~ 'Levant & Caucasus'))
@@ -398,8 +381,9 @@ vio+theme(text=element_text(size=23))+
   ylim(1,3) 
 
 #lets make a map# 
+
 #get co-ords for dat 5# 
-loc_grab <-  subset(gen_dat2, select = c('LIDNUM','NAME','LAT','LONG'))
+loc_grab <-  subset(dat4, select = c('LIDNUM','NAME','LAT','LONG'))
 dat6 <- merge(loc_grab, dat5, by = c('LIDNUM'))  
 dat6$hyps<- round(dat6$hyps, digits=2)
 dat6<-dat6[!duplicated(dat6), ]
@@ -425,7 +409,6 @@ afdat<- afdat%>%mutate(region = case_when(LIDNUM=='23201'|LIDNUM=='23225'|LIDNUM
                                             LIDNUM=='28373'|LIDNUM=='28392'|LIDNUM=='28397'|LIDNUM=='28415'|LIDNUM=='29385'|LIDNUM=='29386'|LIDNUM=='29387'|LIDNUM=='29394'|
                                             LIDNUM=='29395'|LIDNUM=='29442'|LIDNUM=='29443'|LIDNUM=='29444'	~ 'Eastern Africa',LIDNUM=='23189'|LIDNUM=='23190'|LIDNUM=='26960'	~ 'Northern Africa',
                                           LIDNUM=='23864'|LIDNUM=='26913'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='26916'|LIDNUM=='27941'|LIDNUM=='28091'|LIDNUM=='28095'	~ 'Southern Africa'))
-#edit this to be for African regions!
 afdat$region  <- factor(afdat$region,levels = c('Northern Africa', 'Eastern Africa','Southern Africa'))
 vio <- ggplot(afdat, aes(x=region, y=hyps))+
   geom_violin(size=1.25)+ 
@@ -451,7 +434,7 @@ library("lmPerm")
 library("coin")
 library("gtools") 
 
-#make dat with Eurasia & Africa as regions# 
+#make dat with Eurasia & Africa as regions# I just replace the three non-african regions with 'Eurasia' 
 dat7<- dat5 
 fix(dat7)
 
@@ -475,3 +458,4 @@ hist(res,col="gray",las=1,main="")
 abline(v=obs,col="red") 
 
 summary(lmp(hyps~region,data=dat7))
+
