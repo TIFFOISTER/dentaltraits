@@ -439,7 +439,7 @@ dat7<- dat5
 fix(dat7)
 
 set.seed(101) ## for reproducibility
-nsim <- 9999
+nsim <- 99999
 res <- numeric(nsim) ## set aside space for results
 for (i in 1:nsim) {
   ## standard approach: scramble response value
