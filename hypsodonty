@@ -7,22 +7,26 @@ library(sf)
 library(ggforce)
 library(FSA)
 
-dat2<-read.csv('./now_export_09_04.csv')  #now export file# 
+dat2<-read.csv('./now_export_09_04.csv')  
 
 # select the LIDNUMs want # 
 dat2<- subset(dat2, LIDNUM==28666|LIDNUM==23189| LIDNUM == 21050 | LIDNUM == 23189 | LIDNUM == 23190 | LIDNUM == 23200 | LIDNUM == 23201 | LIDNUM == 23225 | 
-                LIDNUM == 23246 |LIDNUM == 23247 | LIDNUM == 23521 | LIDNUM == 23682 | LIDNUM == 23858 | LIDNUM == 23864 | LIDNUM == 24398 | LIDNUM == 23931 | 
-                LIDNUM == 24084 |LIDNUM == 29306 | LIDNUM == 24147 | LIDNUM == 24149 | LIDNUM == 24150 |
-                LIDNUM == 24261 |LIDNUM == 24348 | LIDNUM == 24397 | LIDNUM == 24400 | LIDNUM == 24401 | LIDNUM == 24402 | LIDNUM == 24403 | LIDNUM == 24404 |
-                LIDNUM == 24436 |LIDNUM == 24455 | LIDNUM == 24554 | LIDNUM == 26905 | LIDNUM == 26913 | LIDNUM == 26914 | LIDNUM == 26915 | LIDNUM == 26916 |
-                LIDNUM == 26960 |LIDNUM == 27897 | LIDNUM == 27898 | LIDNUM == 27941 | LIDNUM == 27996 | LIDNUM == 27998 | LIDNUM == 28091 | LIDNUM == 28095 |
-                LIDNUM == 28327 |LIDNUM == 28328 | LIDNUM == 28339 | LIDNUM == 28340 | LIDNUM == 28344 | LIDNUM == 28345 | LIDNUM == 28346 | LIDNUM == 28347 | 
-                LIDNUM == 28348 |LIDNUM == 28362 | LIDNUM == 28363 | LIDNUM == 28364 | LIDNUM == 28366 | LIDNUM == 28367 | LIDNUM == 28369 | LIDNUM == 28372 | 
-                LIDNUM == 28373 |LIDNUM == 28392 | LIDNUM == 28397 | LIDNUM == 28415 | LIDNUM == 28455 | LIDNUM == 28652 | LIDNUM == 28653 | LIDNUM == 28656 | 
-                LIDNUM == 29096 |LIDNUM == 29097 | LIDNUM == 29106 | LIDNUM == 29108 | LIDNUM == 29151 | LIDNUM == 29152 | LIDNUM == 29184 | LIDNUM == 29185 | 
-                LIDNUM == 29187 |LIDNUM == 29308 | LIDNUM == 29369 | LIDNUM == 29370 | LIDNUM == 29371 | LIDNUM == 29372 | 
-                LIDNUM == 29373 |LIDNUM == 29385 | LIDNUM == 29386 | LIDNUM == 29387 | LIDNUM == 29394 | LIDNUM == 29395 | LIDNUM == 29444 | LIDNUM == 29442 | 
-                LIDNUM == 29443 |LIDNUM == 29451 |LIDNUM == 29446 )
+              LIDNUM == 23246 |LIDNUM == 23247 | LIDNUM == 23521 | LIDNUM == 23858 | LIDNUM == 23864 | LIDNUM == 24398 | LIDNUM == 23931 | LIDNUM == 24084 |
+              LIDNUM == 29306 |LIDNUM == 24147 | LIDNUM == 24149 | LIDNUM == 24150 | LIDNUM == 29541 | LIDNUM == 29542 | LIDNUM == 29560 | LIDNUM == 24261 |
+              LIDNUM == 24348 |LIDNUM == 24397 | LIDNUM == 24400 | LIDNUM == 24401 | LIDNUM == 24402 | LIDNUM == 24403 | LIDNUM == 24404 | LIDNUM == 24455 |
+              LIDNUM == 24554 |LIDNUM == 26913 | LIDNUM == 26914 | LIDNUM == 26915 | LIDNUM == 26916 | LIDNUM == 26960 | LIDNUM == 27897 | LIDNUM == 27898 | 
+              LIDNUM == 27941 |LIDNUM == 27996 | LIDNUM == 27998 | LIDNUM == 28091 | LIDNUM == 28095 | LIDNUM == 28327 | LIDNUM == 28328 | LIDNUM == 28339 | 
+              LIDNUM == 28340 |LIDNUM == 28344 | LIDNUM == 28345 | LIDNUM == 28346 | LIDNUM == 28347 | LIDNUM == 28348 | LIDNUM == 28362 | LIDNUM == 28363 | 
+              LIDNUM == 28364 |LIDNUM == 28366 | LIDNUM == 28367 | LIDNUM == 28369 | LIDNUM == 28372 | LIDNUM == 28373 | LIDNUM == 28392 | LIDNUM == 28397 | 
+              LIDNUM == 28455 |LIDNUM == 28652 | LIDNUM == 28653 | LIDNUM == 28656 | LIDNUM == 29096 | LIDNUM == 29097 | LIDNUM == 29106 | LIDNUM == 29108 | 
+              LIDNUM == 29151 |LIDNUM == 29152 | LIDNUM == 29184 | LIDNUM == 29185 | LIDNUM == 29187 | LIDNUM == 29308 | LIDNUM == 29369 | LIDNUM == 29370 | 
+              LIDNUM == 29371 |LIDNUM == 29372 | LIDNUM == 29373 | LIDNUM == 29385 | LIDNUM == 29386 | LIDNUM == 29387 | LIDNUM == 29394 | LIDNUM == 29395 | 
+              LIDNUM == 29444 |LIDNUM == 29442 | LIDNUM == 29443 | LIDNUM == 29451 | LIDNUM == 29446 ) 
+#group for Kanjera south 29385,29386,29387# grouped as 29385# 
+dat2$LIDNUM[dat2$LIDNUM== 29386] <- 29385
+dat2$LIDNUM[dat2$LIDNUM== 29387] <- 29385
+#group for garba, 29541, 29542# group as 29541# 
+dat2$LIDNUM[dat2$LIDNUM== 29542] <- 29541
 #group these lidnums for ATAPUERCA TD 4-6 27897, 27898, 24397,24398# grouped as 27897#  
 dat2$LIDNUM[dat2$LIDNUM== 27898] <- 27897
 dat2$LIDNUM[dat2$LIDNUM== 24397] <- 27897
@@ -157,7 +161,7 @@ dat1_nohomo<-dat1_nohomo%>% mutate(hyps = case_when(TCRWNHT =='hyp'~3, TCRWNHT =
 
 dat2 <- dat1_nohomo 
 
-#21025 cervidae indet. indet. mean# 
+#21025 cervidae indet. indet.# 
 ced <- dat2 %>% filter(dat2$FAMILY == 'Cervidae') 
 ced_mean <- mean(ced$hyps,na.rm=T)
 dat2$hyps[dat2$SIDNUM =='21025'] <- ced_mean
@@ -255,15 +259,15 @@ locdat1 <- distinct(dat2, LIDNUM, .keep_all=TRUE)
 locdat1 <- locdat1 %>% dplyr::select(5:6)
 
 #regions for visualisation# 
-dat3<- dat3 %>% mutate(region = case_when(LIDNUM=='29443'|LIDNUM=='23931'|LIDNUM=='27941'|LIDNUM=='28347'|LIDNUM=='23858'|LIDNUM=='28364'|LIDNUM=='23682'|LIDNUM=='28339'|LIDNUM=='28346'|LIDNUM=='28362'|LIDNUM=='29444'|
-                                            LIDNUM=='28363'|LIDNUM=='28369'|LIDNUM=='28327'|LIDNUM=='23225'|LIDNUM=='23247'|LIDNUM=='26913'|LIDNUM=='28415'|LIDNUM=='28372'|LIDNUM=='23189'|LIDNUM=='26905'|LIDNUM=='29442'|
-                                            LIDNUM=='23201'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='28392'|LIDNUM=='28373'|LIDNUM=='23246'|LIDNUM=='26916'|LIDNUM=='28340'|LIDNUM=='28345'|LIDNUM=='29386'|LIDNUM=='28397'|
-                                            LIDNUM=='28366'|LIDNUM=='28328'|LIDNUM=='29395'|LIDNUM=='28344'|LIDNUM=='28091'|LIDNUM=='28367'|LIDNUM=='23190'|LIDNUM=='29394'|LIDNUM=='26960'|LIDNUM=='28095'|LIDNUM=='28348'|
-                                            LIDNUM=='23864'|LIDNUM=='29385'|LIDNUM=='29387'	~'Africa',
-                                          LIDNUM=='23200'|LIDNUM=='24084'|LIDNUM=='24149'|LIDNUM=='24554'|LIDNUM=='24147'|LIDNUM=='24150'|LIDNUM=='29306'|LIDNUM=='29097'|
-                                            LIDNUM=='29308'|LIDNUM=='29185'|LIDNUM=='29151'|LIDNUM=='29106'|LIDNUM=='29108'|LIDNUM=='29152'~'Asia',
-                                          LIDNUM=='24401'|LIDNUM=='27897'|LIDNUM=='29370'|LIDNUM=='29187'|LIDNUM=='24455'|LIDNUM=='24261'|LIDNUM=='28652'|LIDNUM=='28653'|LIDNUM=='28666'|LIDNUM=='29369'|LIDNUM=='24436'|
-                                            LIDNUM=='28656'	~'Europe', 
+dat3<- dat3 %>% mutate(region = case_when(LIDNUM=='29443'|LIDNUM=='23931'|LIDNUM=='27941'|LIDNUM=='28347'|LIDNUM=='23858'|LIDNUM=='28364'|LIDNUM=='28339'|LIDNUM=='28346'|LIDNUM=='28362'|LIDNUM=='29444'|
+                                          LIDNUM=='28363'|LIDNUM=='28369'|LIDNUM=='28327'|LIDNUM=='23225'|LIDNUM=='23247'|LIDNUM=='26913'|LIDNUM=='28372'|LIDNUM=='23189'|LIDNUM=='29442'|LIDNUM=='29541'| 
+                                          LIDNUM=='29542'|LIDNUM=='29560'|LIDNUM=='23201'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='28392'|LIDNUM=='28373'|LIDNUM=='23246'|LIDNUM=='26916'|LIDNUM=='28340'|
+                                          LIDNUM=='28345'|LIDNUM=='29386'|LIDNUM=='28397'|LIDNUM=='28366'|LIDNUM=='28328'|LIDNUM=='29395'|LIDNUM=='28344'|LIDNUM=='28091'|LIDNUM=='28367'|LIDNUM=='23190'|
+                                          LIDNUM=='29394'|LIDNUM=='26960'|LIDNUM=='28095'|LIDNUM=='28348'|LIDNUM=='23864'|LIDNUM=='29385'|LIDNUM=='29387'	~'Africa',
+                                          LIDNUM=='23200'|LIDNUM=='24084'|LIDNUM=='24149'|LIDNUM=='24554'|LIDNUM=='24147'|LIDNUM=='24150'|LIDNUM=='29306'|LIDNUM=='29097'|LIDNUM=='29308'|LIDNUM=='29185'|
+                                          LIDNUM=='29151'|LIDNUM=='29106'|LIDNUM=='29108'|LIDNUM=='29152'~'Asia',
+                                          LIDNUM=='24401'|LIDNUM=='27897'|LIDNUM=='29370'|LIDNUM=='29187'|LIDNUM=='24455'|LIDNUM=='24261'|LIDNUM=='28652'|LIDNUM=='28653'|LIDNUM=='28666'|LIDNUM=='29369'|
+                                          LIDNUM=='28656'	~'Europe', 
                                           LIDNUM=='28455'|LIDNUM=='27996'|LIDNUM=='29451'|LIDNUM=='21050'|LIDNUM=='24348'|LIDNUM=='23521'~ 'Levant & Caucasus'))
 #violin plot# species level# 
 dat3$region  <- factor(dat3$region,levels = c('Africa', 'Levant & Caucasus','Asia','Europe'))
@@ -283,7 +287,7 @@ vio +theme(text=element_text(size=23)) + theme(
 #write.csv(dat2, 'nowdat_09_04.csv') 
 sidat <- subset(dat2, select = c('SIDNUM','ORDER','FAMILY','GENUS')) 
 sidat2<- distinct(sidat, SIDNUM,.keep_all = T) 
-my_gen <- read.csv('./mygen_09_04.csv') # this is an edited version of the now_dat_09_04 exported earlier, to give all unique genera with hyp scores# 
+my_gen <- read.csv('./mygen_09_04.csv')
 my_gen<-my_gen%>% mutate(hyps= case_when(Score =='hyp'~3, Score == 'mes'~2, Score == 'bra'~1, Score == 'bra/mes'~1.5, Score == 'hys'~3))
 
 #calculate avgs. for mixed hyps genera# 
@@ -313,7 +317,7 @@ dic_mean<- mean(dic$hyps, na.rm=T)
 my_gen$hyps[my_gen$GENUS=='Diceros']<-dic_mean
 gen_dat <- merge(my_gen, sidat2, by = c('GENUS')) 
 gen_dat2 <- gen_dat
-#fill in above gen indets# these were identified using seperate code# 
+#fill in above gen indets# 
 gen_dat2$hyps[gen_dat2$SIDNUM=='21025'] <- ced_mean
 gen_dat2$hyps[gen_dat2$SIDNUM=='21023'] <- bov_mean
 gen_dat2$hyps[gen_dat2$SIDNUM=='25812'] <- bovi_mean
@@ -355,15 +359,16 @@ dat4$hyps.x <- as.numeric(as.character(dat4$hyps.x))
 dat5 <- aggregate(hyps.x ~ LIDNUM, data = dat4, FUN = mean) 
 names(dat5)[names(dat5)=="hyps.x"] <- "hyps"
 #assign LIDNUMs to region# 
-dat5<- dat5 %>% mutate(region = case_when(LIDNUM=='29443'|LIDNUM=='23931'|LIDNUM=='27941'|LIDNUM=='28347'|LIDNUM=='23858'|LIDNUM=='28364'|LIDNUM=='23682'|LIDNUM=='28339'|LIDNUM=='28346'|LIDNUM=='28362'|LIDNUM=='29444'|
-                                            LIDNUM=='28363'|LIDNUM=='28369'|LIDNUM=='28327'|LIDNUM=='23225'|LIDNUM=='23247'|LIDNUM=='26913'|LIDNUM=='28415'|LIDNUM=='28372'|LIDNUM=='23189'|LIDNUM=='26905'|LIDNUM=='29442'|
-                                            LIDNUM=='23201'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='28392'|LIDNUM=='28373'|LIDNUM=='23246'|LIDNUM=='26916'|LIDNUM=='28340'|LIDNUM=='28345'|LIDNUM=='29386'|LIDNUM=='28397'|
-                                            LIDNUM=='28366'|LIDNUM=='28328'|LIDNUM=='29395'|LIDNUM=='28344'|LIDNUM=='28091'|LIDNUM=='28367'|LIDNUM=='23190'|LIDNUM=='29394'|LIDNUM=='26960'|LIDNUM=='28095'|LIDNUM=='28348'|
-                                            LIDNUM=='23864'|LIDNUM=='29385'|LIDNUM=='29387'	~'Africa',
-                                          LIDNUM=='23200'|LIDNUM=='24084'|LIDNUM=='24149'|LIDNUM=='24554'|LIDNUM=='24147'|LIDNUM=='24150'|LIDNUM=='29306'|LIDNUM=='29097'|
-                                            LIDNUM=='29308'|LIDNUM=='29185'|LIDNUM=='29151'|LIDNUM=='29106'|LIDNUM=='29108'|LIDNUM=='29152'~'Asia',
-                                          LIDNUM=='24401'|LIDNUM=='27897'|LIDNUM=='29370'|LIDNUM=='29187'|LIDNUM=='24455'|LIDNUM=='24261'|LIDNUM=='28652'|LIDNUM=='28653'|LIDNUM=='28666'|LIDNUM=='29369'|LIDNUM=='24436'|
-                                            LIDNUM=='28656'	~'Europe',LIDNUM=='28455'|LIDNUM=='27996'|LIDNUM=='29451'|LIDNUM=='21050'|LIDNUM=='24348'|LIDNUM=='23521'~ 'Levant & Caucasus'))
+dat5<- dat5 %>% mutate(region = case_when(LIDNUM=='29443'|LIDNUM=='23931'|LIDNUM=='27941'|LIDNUM=='28347'|LIDNUM=='23858'|LIDNUM=='28364'|LIDNUM=='28339'|LIDNUM=='28346'|LIDNUM=='28362'|LIDNUM=='29444'|
+                                          LIDNUM=='28363'|LIDNUM=='28369'|LIDNUM=='28327'|LIDNUM=='23225'|LIDNUM=='23247'|LIDNUM=='26913'|LIDNUM=='28372'|LIDNUM=='23189'|LIDNUM=='29442'|LIDNUM=='23201'|
+                                          LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='28392'|LIDNUM=='28373'|LIDNUM=='23246'|LIDNUM=='26916'|LIDNUM=='28340'|LIDNUM=='28345'|LIDNUM=='29386'|LIDNUM=='28397'|
+                                          LIDNUM=='28366'|LIDNUM=='28328'|LIDNUM=='29395'|LIDNUM=='28344'|LIDNUM=='28091'|LIDNUM=='28367'|LIDNUM=='23190'|LIDNUM=='29394'|LIDNUM=='26960'|LIDNUM=='28095'|
+                                          LIDNUM=='28348'|LIDNUM=='23864'|LIDNUM=='29385'|LIDNUM=='29387'|LIDNUM == '29541' | LIDNUM == '29542' | LIDNUM == '29560'	~'Africa',
+                                          LIDNUM=='23200'|LIDNUM=='24084'|LIDNUM=='24149'|LIDNUM=='24554'|LIDNUM=='24147'|LIDNUM=='24150'|LIDNUM=='29306'|LIDNUM=='29097'|LIDNUM=='29308'|LIDNUM=='29185'|
+                                          LIDNUM=='29151'|LIDNUM=='29106'|LIDNUM=='29108'|LIDNUM=='29152'~'Asia',
+                                          LIDNUM=='24401'|LIDNUM=='27897'|LIDNUM=='29370'|LIDNUM=='29187'|LIDNUM=='24455'|LIDNUM=='24261'|LIDNUM=='28652'|LIDNUM=='28653'|LIDNUM=='28666'|LIDNUM=='29369'|
+                                          LIDNUM=='28656'	~'Europe',
+                                          LIDNUM=='28455'|LIDNUM=='27996'|LIDNUM=='29451'|LIDNUM=='21050'|LIDNUM=='24348'|LIDNUM=='23521'~ 'Levant & Caucasus'))
 #violin plot 
 dat5$region  <- factor(dat5$region,levels = c('Africa', 'Levant & Caucasus','Asia','Europe'))
 vio <- ggplot(dat5, aes(x=region, y=hyps))+
@@ -381,7 +386,6 @@ vio+theme(text=element_text(size=23))+
   ylim(1,3) 
 
 #lets make a map# 
-
 #get co-ords for dat 5# 
 loc_grab <-  subset(dat4, select = c('LIDNUM','NAME','LAT','LONG'))
 dat6 <- merge(loc_grab, dat5, by = c('LIDNUM'))  
@@ -403,12 +407,15 @@ hyp_map
 
 #northern, southern, eastern africa plot#  
 afdat <- filter(dat5, region == "Africa")
-afdat<- afdat%>%mutate(region = case_when(LIDNUM=='23201'|LIDNUM=='23225'|LIDNUM=='23246'|LIDNUM=='23247'|LIDNUM=='23682'|LIDNUM=='23858'|LIDNUM=='23931'|LIDNUM=='26905'|
-                                            LIDNUM=='28327'|LIDNUM=='28328'|LIDNUM=='28339'|LIDNUM=='28340'|LIDNUM=='28344'|LIDNUM=='28345'|LIDNUM=='28346'|LIDNUM=='28347'|
-                                            LIDNUM=='28348'|LIDNUM=='28362'|LIDNUM=='28363'|LIDNUM=='28364'|LIDNUM=='28366'|LIDNUM=='28367'|LIDNUM=='28369'|LIDNUM=='28372'|
-                                            LIDNUM=='28373'|LIDNUM=='28392'|LIDNUM=='28397'|LIDNUM=='28415'|LIDNUM=='29385'|LIDNUM=='29386'|LIDNUM=='29387'|LIDNUM=='29394'|
-                                            LIDNUM=='29395'|LIDNUM=='29442'|LIDNUM=='29443'|LIDNUM=='29444'	~ 'Eastern Africa',LIDNUM=='23189'|LIDNUM=='23190'|LIDNUM=='26960'	~ 'Northern Africa',
-                                          LIDNUM=='23864'|LIDNUM=='26913'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='26916'|LIDNUM=='27941'|LIDNUM=='28091'|LIDNUM=='28095'	~ 'Southern Africa'))
+afdat<- afdat%>%mutate(region = case_when(LIDNUM=='23201'|LIDNUM=='23225'|LIDNUM=='23246'|LIDNUM=='23247'|LIDNUM=='23858'|LIDNUM=='23931'|
+                                          LIDNUM=='28327'|LIDNUM=='28328'|LIDNUM=='28339'|LIDNUM=='28340'|LIDNUM=='28344'|LIDNUM=='28345'|
+                                          LIDNUM=='28346'|LIDNUM=='28347'|LIDNUM=='28348'|LIDNUM=='28362'|LIDNUM=='28363'|LIDNUM=='28364'|
+                                          LIDNUM=='28366'|LIDNUM=='28367'|LIDNUM=='28369'|LIDNUM=='28372'|LIDNUM=='28373'|LIDNUM=='28392'|
+                                          LIDNUM=='28397'|LIDNUM=='29385'|LIDNUM=='29386'|LIDNUM=='29387'|LIDNUM=='29394'|LIDNUM=='29395'|
+                                          LIDNUM=='29442'|LIDNUM=='29443'|LIDNUM=='29444'|LIDNUM == '29541' | LIDNUM == '29542' | LIDNUM == '29560'	~ 'Eastern Africa',
+                                          LIDNUM=='23189'|LIDNUM=='23190'|LIDNUM=='26960'	~ 'Northern Africa',
+                                          LIDNUM=='23864'|LIDNUM=='26913'|LIDNUM=='26914'|LIDNUM=='26915'|LIDNUM=='26916'|LIDNUM=='27941'|
+                                          LIDNUM=='28091'|LIDNUM=='28095'	~ 'Southern Africa'))
 afdat$region  <- factor(afdat$region,levels = c('Northern Africa', 'Eastern Africa','Southern Africa'))
 vio <- ggplot(afdat, aes(x=region, y=hyps))+
   geom_violin(size=1.25)+ 
@@ -434,9 +441,9 @@ library("lmPerm")
 library("coin")
 library("gtools") 
 
-#make dat with Eurasia & Africa as regions# I just replace the three non-african regions with 'Eurasia' 
+#make dat with Eurasia & Africa as regions# 
 dat7<- dat5 
-fix(dat7)
+fix(dat7) #go through an replace all non-Africa regions with 'Eurasia# 
 
 set.seed(101) ## for reproducibility
 nsim <- 99999
